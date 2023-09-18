@@ -3,9 +3,7 @@
 // Change this to your NetId
 package bal210004;
 
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Scanner;
+import java.util.*;
 import java.io.FileNotFoundException;
 import java.io.File;
 
@@ -67,6 +65,15 @@ public class Expression {
             case "+":
                 result = new Token(TokenType.PLUS, 1, tok);  // modify if priority of "+" is not 1
                 break;
+            case "*":
+                result=new Token(TokenType.TIMES,2,tok);
+                break;
+            case "(":
+                result=new Token(TokenType.OPEN,3,tok);
+                break;
+            case ")":
+                result=new Token(TokenType.CLOSE,3,tok);
+                break;
             // Complete rest of this method
             default:
                 result = new Token(tok);
@@ -100,7 +107,33 @@ public class Expression {
     // Given a list of tokens corresponding to an infix expression,
     // return its equivalent postfix expression as a list of tokens.
     public static List<Token> infixToPostfix(List<Token> exp) {  // To do
-        return null;
+        ArrayDeque<Token> stack = new ArrayDeque<Token>();
+        List<Token> retExpression=new LinkedList<Token>();
+        Iterator<Token> tmpIter=exp.listIterator();
+        Token tmp;
+        while(tmpIter.hasNext()){
+            tmp=tmpIter.next();
+            if(tmp.isOperand()){
+                retExpression.add(tmp);
+            } else {
+                if(tmp.token==TokenType.CLOSE){
+                    while(stack.peek()!=null&&stack.peek().token!=TokenType.OPEN) // pop all operators until open parentheses is found
+                        retExpression.add(stack.pop());
+                    stack.pop();//discard the open parentheses
+                } else if(tmp.token==TokenType.OPEN) { // push the open parentheses to stack
+                    stack.push(tmp);
+                } else { // normal operator, evaluate priority of the token at end of the stack, then push
+                    while (stack.peek() != null && stack.peek().priority >= tmp.priority && stack.peek().token!=TokenType.OPEN) {
+                        retExpression.add(stack.pop());
+                    }
+                    stack.push(tmp);
+                }
+            }
+        }
+        while(stack.peek()!=null){
+            retExpression.add(stack.pop());
+        }
+        return retExpression;
     }
 
     // Given a postfix expression, evaluate it and return its value.
@@ -137,13 +170,13 @@ public class Expression {
             if (len > 0) {
                 count++;
                 System.out.println("Expression number: " + count);
-                System.out.println("Infix expression: " + infix);
-                Expression exp = infixToExpression(infix);
+                //System.out.println("Infix expression: " + infix);
+                //Expression exp = infixToExpression(infix);
                 List<Token> post = infixToPostfix(infix);
                 System.out.println("Postfix expression: " + post);
-                long pval = evaluatePostfix(post);
-                long eval = evaluateExpression(exp);
-                System.out.println("Postfix eval: " + pval + " Exp eval: " + eval + "\n");
+                //long pval = evaluatePostfix(post);
+                //long eval = evaluateExpression(exp);
+                //System.out.println("Postfix eval: " + pval + " Exp eval: " + eval + "\n");
             }
         }
     }
