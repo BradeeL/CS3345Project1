@@ -3,6 +3,7 @@
 // Change this to your NetId
 package bal210004;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.io.FileNotFoundException;
 import java.io.File;
@@ -113,7 +114,41 @@ public class Expression {
     // Given a list of tokens corresponding to an infix expression,
     // return the expression tree corresponding to it.
     public static Expression infixToExpression(List<Token> exp) {  // To do
-        return null;
+        ArrayDeque<Expression> outputStack=new ArrayDeque<Expression>();
+        ArrayDeque<Token> operatorStack=new ArrayDeque<Token>();
+        Iterator<Token> tmpIter=exp.listIterator();
+        Token tmp;
+        Expression op1;
+        Expression op2;
+        while(tmpIter.hasNext()){
+            tmp=tmpIter.next();
+            if(tmp.isOperand()){
+                outputStack.push(new Expression(tmp));
+            } else {
+                if(tmp.token==TokenType.CLOSE){ //pop until open is reached
+                    while(operatorStack.peek()!=null&& operatorStack.peek().token!=TokenType.OPEN){
+                        op2=outputStack.pop();
+                        op1=outputStack.pop();
+                        outputStack.push(new Expression(operatorStack.pop(),op1,op2));
+                    }
+                    operatorStack.pop();//discard the open parentheses
+                } else { //normal operator, pop until tmp is greater than the top of the stack, then push tmp
+                    while(operatorStack.peek()!=null&&operatorStack.peek().priority>=tmp.priority&&operatorStack.peek().token!=TokenType.OPEN){
+                        op2=outputStack.pop();
+                        op1=outputStack.pop();
+                        outputStack.push(new Expression(operatorStack.pop(),op1,op2));
+                    }
+                    operatorStack.push(tmp);
+                }
+            }
+        }
+        //no more input, pop operators until operatorStack is empty
+        while(operatorStack.peek()!=null){
+            op2=outputStack.pop();
+            op1=outputStack.pop();
+            outputStack.push(new Expression(operatorStack.pop(),op1,op2));
+        }
+        return outputStack.pop();
     }
 
     // Given a list of tokens corresponding to an infix expression,
@@ -132,8 +167,6 @@ public class Expression {
                     while(stack.peek()!=null&&stack.peek().token!=TokenType.OPEN) // pop all operators until open parentheses is found
                         retExpression.add(stack.pop());
                     stack.pop();//discard the open parentheses
-                } else if(tmp.token==TokenType.OPEN) { // push the open parentheses to stack
-                    stack.push(tmp);
                 } else { // normal operator, evaluate priority of the token at end of the stack, then push
                     while (stack.peek() != null && stack.peek().priority >= tmp.priority && stack.peek().token!=TokenType.OPEN) {
                         retExpression.add(stack.pop());
@@ -188,8 +221,29 @@ public class Expression {
     }
 
     // Given an expression tree, evaluate it and return its value.
-    public static long evaluateExpression(Expression tree) {  // To do
-        return 0;
+    public static long evaluateExpression(Expression tree) {// To do
+        if(tree.element.isOperand()) {
+            return tree.element.getValue();
+        } else {
+            long op1 = evaluateExpression(tree.left);
+            long op2 = evaluateExpression(tree.right);
+            switch (tree.element.token) {
+                case PLUS:
+                    return op1 + op2;
+                case MINUS:
+                    return op1 - op2;
+                case TIMES:
+                    return op1 * op2;
+                case DIV:
+                    return op1 / op2;
+                case MOD:
+                    return op1 % op2;
+                case POWER:
+                    return (long) Math.pow(op1, op2);
+                default://this statement should not be reached, if reached, error occurred
+                    return 0;
+            }
+        }
     }
 
     // sample main program for testing
@@ -216,13 +270,12 @@ public class Expression {
             if (len > 0) {
                 count++;
                 System.out.println("Expression number: " + count);
-                //System.out.println("Infix expression: " + infix);
-                //Expression exp = infixToExpression(infix);
+                System.out.println("Infix expression: " + infix);
+                Expression exp = infixToExpression(infix);
                 List<Token> post = infixToPostfix(infix);
                 System.out.println("Postfix expression: " + post);
                 long pval = evaluatePostfix(post);
-                //long eval = evaluateExpression(exp);
-                long eval = 0;
+                long eval = evaluateExpression(exp);
                 System.out.println("Postfix eval: " + pval + " Exp eval: " + eval + "\n");
             }
         }
