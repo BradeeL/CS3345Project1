@@ -150,7 +150,41 @@ public class Expression {
 
     // Given a postfix expression, evaluate it and return its value.
     public static long evaluatePostfix(List<Token> exp) {  // To do
-        return 0;
+        ArrayDeque<Token> stack = new ArrayDeque<Token>();
+        ListIterator<Token> tmpIter=exp.listIterator();
+        Token tmp;
+        long op1;
+        long op2;
+        while(tmpIter.hasNext()){
+            tmp=tmpIter.next();
+            if(tmp.isOperand()){
+                stack.push(tmp);
+            } else {
+                op2 = stack.pop().getValue();
+                op1 = stack.pop().getValue();
+                switch(tmp.token){
+                    case PLUS:
+                        stack.push(getToken((op1+op2)+""));
+                        break;
+                    case MINUS:
+                        stack.push(getToken((op1-op2)+""));
+                        break;
+                    case TIMES:
+                        stack.push(getToken((op1*op2)+""));
+                        break;
+                    case DIV:
+                        stack.push(getToken((op1/op2)+""));
+                        break;
+                    case POWER:
+                        stack.push(getToken(((long)Math.pow(op1,op2))+""));
+                        break;
+                    case MOD:
+                        stack.push(getToken((op1%op2)+""));
+                        break;
+                }
+            }
+        }
+        return stack.pop().getValue();
     }
 
     // Given an expression tree, evaluate it and return its value.
@@ -186,9 +220,10 @@ public class Expression {
                 //Expression exp = infixToExpression(infix);
                 List<Token> post = infixToPostfix(infix);
                 System.out.println("Postfix expression: " + post);
-                //long pval = evaluatePostfix(post);
+                long pval = evaluatePostfix(post);
                 //long eval = evaluateExpression(exp);
-                //System.out.println("Postfix eval: " + pval + " Exp eval: " + eval + "\n");
+                long eval = 0;
+                System.out.println("Postfix eval: " + pval + " Exp eval: " + eval + "\n");
             }
         }
     }
