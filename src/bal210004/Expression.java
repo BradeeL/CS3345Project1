@@ -65,14 +65,26 @@ public class Expression {
             case "+":
                 result = new Token(TokenType.PLUS, 1, tok);  // modify if priority of "+" is not 1
                 break;
+            case "-":
+                result = new Token(TokenType.MINUS, 1, tok);
+                break;
             case "*":
-                result=new Token(TokenType.TIMES,2,tok);
+                result=new Token(TokenType.TIMES, 2, tok);
+                break;
+            case "/":
+                result=new Token(TokenType.DIV, 2, tok);
+                break;
+            case "%":
+                result=new Token(TokenType.MOD, 2, tok);
+                break;
+            case "^":
+                result=new Token(TokenType.POWER, 3, tok);
                 break;
             case "(":
-                result=new Token(TokenType.OPEN,3,tok);
+                result=new Token(TokenType.OPEN,4,tok);
                 break;
             case ")":
-                result=new Token(TokenType.CLOSE,3,tok);
+                result=new Token(TokenType.CLOSE,4,tok);
                 break;
             // Complete rest of this method
             default:
