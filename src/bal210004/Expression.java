@@ -114,8 +114,8 @@ public class Expression {
     // Given a list of tokens corresponding to an infix expression,
     // return the expression tree corresponding to it.
     public static Expression infixToExpression(List<Token> exp) {  // To do
-        ArrayDeque<Expression> outputStack=new ArrayDeque<Expression>();
-        ArrayDeque<Token> operatorStack=new ArrayDeque<Token>();
+        ArrayDeque<Expression> outputStack=new ArrayDeque<>();
+        ArrayDeque<Token> operatorStack=new ArrayDeque<>();
         Iterator<Token> tmpIter=exp.listIterator();
         Token tmp;
         Expression op1;
@@ -154,8 +154,8 @@ public class Expression {
     // Given a list of tokens corresponding to an infix expression,
     // return its equivalent postfix expression as a list of tokens.
     public static List<Token> infixToPostfix(List<Token> exp) {  // To do
-        ArrayDeque<Token> stack = new ArrayDeque<Token>();
-        List<Token> retExpression=new LinkedList<Token>();
+        ArrayDeque<Token> stack = new ArrayDeque<>();
+        List<Token> retExpression=new LinkedList<>();
         Iterator<Token> tmpIter=exp.listIterator();
         Token tmp;
         while(tmpIter.hasNext()){
@@ -183,7 +183,7 @@ public class Expression {
 
     // Given a postfix expression, evaluate it and return its value.
     public static long evaluatePostfix(List<Token> exp) {  // To do
-        ArrayDeque<Token> stack = new ArrayDeque<Token>();
+        ArrayDeque<Token> stack = new ArrayDeque<>();
         ListIterator<Token> tmpIter=exp.listIterator();
         Token tmp;
         long op1;
