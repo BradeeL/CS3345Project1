@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.io.FileNotFoundException;
 import java.io.File;
+import java.util.regex.Pattern;
 
 /**
  * Class to store a node of expression tree
@@ -62,6 +63,11 @@ public class Expression {
     // NUMBER is either "0" or "[-]?[1-9][0-9]*
     static Token getToken(String tok) {  // To do
         Token result;
+        // assign priority to each operator.
+        // + and - are the lowest priority,
+        // *, /, and % are next highest,
+        // ^ is the next highest,
+        // parentheses override all other operators
         switch (tok) {
             case "+":
                 result = new Token(TokenType.PLUS, 1, tok);  // modify if priority of "+" is not 1
@@ -82,10 +88,10 @@ public class Expression {
                 result=new Token(TokenType.POWER, 3, tok);
                 break;
             case "(":
-                result=new Token(TokenType.OPEN,4,tok);
+                result=new Token(TokenType.OPEN,99,tok);
                 break;
             case ")":
-                result=new Token(TokenType.CLOSE,4,tok);
+                result=new Token(TokenType.CLOSE,99,tok);
                 break;
             // Complete rest of this method
             default:
@@ -116,6 +122,7 @@ public class Expression {
     public static Expression infixToExpression(List<Token> exp) {  // To do
         ArrayDeque<Expression> outputStack=new ArrayDeque<>();
         ArrayDeque<Token> operatorStack=new ArrayDeque<>();
+        operatorStack.push(new Token(TokenType.NIL,-1,""));
         Iterator<Token> tmpIter=exp.listIterator();
         Token tmp;
         Expression op1;
@@ -126,14 +133,14 @@ public class Expression {
                 outputStack.push(new Expression(tmp));
             } else {
                 if(tmp.token==TokenType.CLOSE){ //pop until open is reached
-                    while(operatorStack.peek()!=null&& operatorStack.peek().token!=TokenType.OPEN){
+                    while(operatorStack.peek().token!=TokenType.NIL&& operatorStack.peek().token!=TokenType.OPEN){
                         op2=outputStack.pop();
                         op1=outputStack.pop();
                         outputStack.push(new Expression(operatorStack.pop(),op1,op2));
                     }
                     operatorStack.pop();//discard the open parentheses
                 } else { //normal operator, pop until tmp is greater than the top of the stack, then push tmp
-                    while(operatorStack.peek()!=null&&operatorStack.peek().priority>=tmp.priority&&operatorStack.peek().token!=TokenType.OPEN){
+                    while(operatorStack.peek().token!=TokenType.NIL&&operatorStack.peek().priority>=tmp.priority&&operatorStack.peek().token!=TokenType.OPEN){
                         op2=outputStack.pop();
                         op1=outputStack.pop();
                         outputStack.push(new Expression(operatorStack.pop(),op1,op2));
@@ -143,7 +150,7 @@ public class Expression {
             }
         }
         //no more input, pop operators until operatorStack is empty
-        while(operatorStack.peek()!=null){
+        while(operatorStack.peek().token!=TokenType.NIL){
             op2=outputStack.pop();
             op1=outputStack.pop();
             outputStack.push(new Expression(operatorStack.pop(),op1,op2));
@@ -155,6 +162,7 @@ public class Expression {
     // return its equivalent postfix expression as a list of tokens.
     public static List<Token> infixToPostfix(List<Token> exp) {  // To do
         ArrayDeque<Token> stack = new ArrayDeque<>();
+        stack.push(new Token(TokenType.NIL,-1,""));
         List<Token> retExpression=new LinkedList<>();
         Iterator<Token> tmpIter=exp.listIterator();
         Token tmp;
@@ -164,18 +172,18 @@ public class Expression {
                 retExpression.add(tmp);
             } else {
                 if(tmp.token==TokenType.CLOSE){
-                    while(stack.peek()!=null&&stack.peek().token!=TokenType.OPEN) // pop all operators until open parentheses is found
+                    while(stack.peek().token!=TokenType.NIL&&stack.peek().token!=TokenType.OPEN) // pop all operators until open parentheses is found
                         retExpression.add(stack.pop());
                     stack.pop();//discard the open parentheses
                 } else { // normal operator, evaluate priority of the token at end of the stack, then push
-                    while (stack.peek() != null && stack.peek().priority >= tmp.priority && stack.peek().token!=TokenType.OPEN) {
+                    while (stack.peek().token!=TokenType.NIL && stack.peek().priority >= tmp.priority && stack.peek().token!=TokenType.OPEN) {
                         retExpression.add(stack.pop());
                     }
                     stack.push(tmp);
                 }
             }
         }
-        while(stack.peek()!=null){
+        while(stack.peek().token!=TokenType.NIL){
             retExpression.add(stack.pop());
         }
         return retExpression;
@@ -262,6 +270,7 @@ public class Expression {
             String s = in.nextLine();
             List<Token> infix = new LinkedList<>();
             Scanner sscan = new Scanner(s);
+
             int len = 0;
             while (sscan.hasNext()) {
                 infix.add(getToken(sscan.next()));
